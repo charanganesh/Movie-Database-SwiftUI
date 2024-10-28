@@ -18,13 +18,9 @@ struct MovieDatabaseView: View {
                     if viewModel.searchQuery.isEmpty {
                     
                         categoryRow(category: "Year") { [$0.year] }
-                        Divider()
                         categoryRow(category: "Genre") { $0.genre.split(separator: ",").map { $0.trimmingCharacters(in: .whitespaces) } }
-                        Divider()
                         categoryRow(category: "Directors") { [$0.director] }
-                        Divider()
                         categoryRow(category: "Actors") { $0.actors.split(separator: ",").map { $0.trimmingCharacters(in: .whitespaces) } }
-                        Divider()
                         categoryRow(category: "All Movies") { _ in [] }
                         
                     } else {
@@ -45,20 +41,6 @@ struct MovieDatabaseView: View {
             }
             .navigationTitle("Movie Database")
             .searchable(text: $viewModel.searchQuery, prompt: "Search movies by title, genre, actor, director")
-            .searchSuggestions {
-                ForEach(["Action", "Comedy", "Drama", "Sci-Fi"], id: \.self) { suggestion in
-                    HStack {
-                        Button(suggestion) {
-                            viewModel.searchQuery = suggestion
-                            viewModel.filterMovies(by: suggestion)
-                        }
-                        Spacer()
-                    }
-                }
-            }
-            .onChange(of: viewModel.searchQuery) {
-                viewModel.filterMovies(by: viewModel.searchQuery)
-            }
             .task {
                 viewModel.loadMovies()
             }
@@ -68,39 +50,46 @@ struct MovieDatabaseView: View {
     
     // MARK: Category Cell
     private func categoryRow(category: String, valuesProvider: @escaping (Movie) -> [String]) -> some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Button(action: {
-                withAnimation {
-                    viewModel.toggleSection(category)
+        GroupBox {
+            VStack(alignment: .leading, spacing: 4) {
+                Button(action: {
+                    withAnimation {
+                        viewModel.toggleSection(category)
+                    }
+                }) {
+                    HStack {
+                        Text(category)
+                            .font(.headline)
+                            .foregroundStyle(.black)
+                        Spacer()
+                        Image(systemName: viewModel.expandedSection == category ? "chevron.down.circle.fill" : "chevron.right.circle.fill")
+                            .symbolRenderingMode(.hierarchical)
+                            .font(.headline)
+                            .foregroundStyle(viewModel.expandedSection == category ? .green : .secondary)
+                    }
+                    .padding(.vertical, 5)
                 }
-            }) {
-                HStack {
-                    Text(category)
-                        .font(.headline)
-                        .foregroundStyle(.black)
-                    Spacer()
-                    Image(systemName: viewModel.expandedSection == category ? "chevron.down.circle.fill" : "chevron.right.circle.fill")
-                        .symbolRenderingMode(.hierarchical)
-                        .font(.headline)
-                        .foregroundStyle(viewModel.expandedSection == category ? .green : .secondary)
-                }
-                .padding(.vertical, 5)
-            }
 
-            if viewModel.expandedSection == category {
-                if category.lowercased() == "all movies" {
-                    ForEach(viewModel.movies) { movie in
-                        Button {
-                            selectedMovie = movie
-                        } label: {
-                            movieRow(movie, indentation: 10)
+                if viewModel.expandedSection == category {
+                    if category.lowercased() == "all movies" {
+                        GroupBox {
+                            ForEach(viewModel.movies) { movie in
+                                Button {
+                                    selectedMovie = movie
+                                } label: {
+                                    movieRow(movie, indentation: 10)
+                                }
+                            }
+                        }
+                    } else {
+                        GroupBox {
+                            expandableCategoryList(items: Array(Set(viewModel.movies.flatMap(valuesProvider)).sorted()), filterBy: valuesProvider)
                         }
                     }
-                } else {
-                    expandableCategoryList(items: Array(Set(viewModel.movies.flatMap(valuesProvider)).sorted()), filterBy: valuesProvider)
                 }
             }
         }
+
     }
     
     // MARK: Movie Cell
@@ -135,7 +124,7 @@ struct MovieDatabaseView: View {
     }
 
     private func expandableCategoryList(items: [String], filterBy: @escaping (Movie) -> [String]) -> some View {
-        VStack(alignment: .leading, spacing: 4) {
+        VStack(alignment: .leading, spacing: 10) {
             ForEach(items, id: \.self) { item in
                 Button(action: {
                     withAnimation {

@@ -12,52 +12,43 @@ import Observation
 final class MovieDatabaseViewModel {
     var movies: [Movie] = []
     var searchQuery: String = ""
-    var filteredMovies: [Movie] = []
     var selectedMovie: Movie?
-    var expandedSection: String? // Track expanded section
-    var expandedSubCategory: String? // Track expanded sub-category
+    var expandedSection: String?
+    var expandedSubCategory: String?
+    
+    var filteredMovies: [Movie] {
+        guard !searchQuery.isEmpty else { return movies }
+        return movies.filter {
+            $0.title.contains(searchQuery) || $0.genre.contains(searchQuery) || $0.actors.contains(searchQuery) || $0.director.contains(searchQuery)
+        }
+    }
     
     func loadMovies() {
-        // Attempt to locate the file in the bundle
         guard let url = Bundle.main.url(forResource: "movies", withExtension: "json") else {
             print("Error: movies.json file not found in bundle.")
             return
         }
         
         do {
-            // Load data from file URL
             let data = try Data(contentsOf: url)
             let decoder = JSONDecoder()
             
-            // Attempt to decode the data into Movie objects
             let decodedMovies = try decoder.decode([Movie].self, from: data)
             DispatchQueue.main.async {
                 self.movies = decodedMovies
-                self.filteredMovies = self.movies
             }
         } catch {
-            // Print decoding error for debugging
             print("Error loading or decoding movies.json: \(error)")
         }
     }
-    
-    func filterMovies(by query: String) {
-        if query.isEmpty {
-            filteredMovies = movies
-        } else {
-            filteredMovies = movies.filter {
-                $0.title.contains(query) || $0.genre.contains(query) || $0.actors.contains(query) || $0.director.contains(query)
-            }
-        }
-    }
+
+
     
     func toggleSection(_ category: String) {
         if expandedSection == category {
-            // If already expanded, collapse it and reset subcategory
             expandedSection = nil
             expandedSubCategory = nil
         } else {
-            // Expand this category and reset the subcategory
             expandedSection = category
             expandedSubCategory = nil
         }
