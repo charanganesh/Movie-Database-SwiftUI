@@ -44,7 +44,7 @@ struct MovieDatabaseView: View {
             .navigationTitle("Movie Database")
             .searchable(text: $viewModel.searchQuery, prompt: "Search movies by title, genre, actor, director")
             .task {
-                viewModel.loadMovies()
+                await loadMovies()
             }
 
         }
@@ -141,7 +141,13 @@ struct MovieDatabaseView: View {
             }
         }
     }
-
+    private func loadMovies() async {
+        do {
+            viewModel.movies = try await viewModel.fetchMovies()
+        } catch {
+            print("Error loading movies: \(error)")
+        }
+    }
 }
 
 #Preview {

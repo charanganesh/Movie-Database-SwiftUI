@@ -22,26 +22,17 @@ final class MovieDatabaseViewModel {
         }
     }
     
-    func loadMovies() {
+    func fetchMovies() async throws -> [Movie] {
         guard let url = Bundle.main.url(forResource: "movies", withExtension: "json") else {
-            print("Error: movies.json file not found in bundle.")
-            return
+            throw NSError(domain: "", code: 404, userInfo: [NSLocalizedDescriptionKey: "movies.json file not found in bundle."])
         }
         
-        do {
-            let data = try Data(contentsOf: url)
-            let decoder = JSONDecoder()
-            
-            let decodedMovies = try decoder.decode([Movie].self, from: data)
-            DispatchQueue.main.async {
-                self.movies = decodedMovies
-            }
-        } catch {
-            print("Error loading or decoding movies.json: \(error)")
-        }
+        let data = try Data(contentsOf: url)
+        let decoder = JSONDecoder()
+        let movies = try decoder.decode([Movie].self, from: data)
+        
+        return movies
     }
-
-
     
     func toggleSection(_ category: String) {
         if expandedSection == category {
