@@ -14,7 +14,6 @@ final class MovieDatabaseViewModel {
     var searchQuery: String = ""
     var selectedMovie: Movie?
     var expandedSection: String?
-    var expandedSubCategory: String?
     
     var filteredMovies: [Movie] {
         guard !searchQuery.isEmpty else { return movies }
@@ -47,18 +46,8 @@ final class MovieDatabaseViewModel {
     func toggleSection(_ category: String) {
         if expandedSection == category {
             expandedSection = nil
-            expandedSubCategory = nil
         } else {
             expandedSection = category
-            expandedSubCategory = nil
-        }
-    }
-    
-    func toggleSubCategory(_ subCategory: String) {
-        if expandedSubCategory == subCategory {
-            expandedSubCategory = nil
-        } else {
-            expandedSubCategory = subCategory
         }
     }
 }

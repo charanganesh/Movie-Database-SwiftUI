@@ -26,10 +26,12 @@ struct MovieDatabaseView: View {
                     } else {
                         // Display search results when there's a query
                         ForEach(viewModel.filteredMovies) { movie in
-                            Button {
-                                selectedMovie = movie
-                            } label: {
-                                movieRow(movie, indentation: 0)
+                            GroupBox {
+                                Button {
+                                    selectedMovie = movie
+                                } label: {
+                                    movieRow(movie, indentation: 0)
+                                }
                             }
                         }
                     }
@@ -49,6 +51,9 @@ struct MovieDatabaseView: View {
     }
     
     // MARK: Category Cell
+    
+    // category is the title label
+    // valuesProvider is used to provide the values for the category
     private func categoryRow(category: String, valuesProvider: @escaping (Movie) -> [String]) -> some View {
         GroupBox {
             VStack(alignment: .leading, spacing: 4) {
@@ -126,36 +131,16 @@ struct MovieDatabaseView: View {
     private func expandableCategoryList(items: [String], filterBy: @escaping (Movie) -> [String]) -> some View {
         VStack(alignment: .leading, spacing: 10) {
             ForEach(items, id: \.self) { item in
-                Button(action: {
-                    withAnimation {
-                        viewModel.toggleSubCategory(item)
-                    }
-                }) {
-                    HStack {
-                        Text(item)
-                            .multilineTextAlignment(.leading)
-                            .font(.subheadline)
-                            .foregroundColor(.black)
-                        Spacer()
-                        Image(systemName: viewModel.expandedSubCategory == item ? "chevron.down.circle.fill" : "chevron.right.circle.fill")
-                            .font(.subheadline)
-                            .symbolRenderingMode(.hierarchical)
-                            .foregroundStyle(viewModel.expandedSubCategory == item ? .green : .secondary)
-                        
-                    }
-                    .padding([.leading, .trailing], 10)
-                    
-                }
-                
-                if viewModel.expandedSubCategory == item {
+                DisclosureGroup("\(item)") {
                     ForEach(viewModel.movies.filter { filterBy($0).contains(item) }) { movie in
                         movieRow(movie, indentation: 20)
                     }
                 }
+                .tint(.black)
+
             }
         }
     }
-    
 
 }
 
