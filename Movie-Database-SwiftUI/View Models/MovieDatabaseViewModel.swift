@@ -12,7 +12,6 @@ import Observation
 final class MovieDatabaseViewModel {
     var movies: [Movie] = []
     var searchQuery: String = ""
-    var selectedMovie: Movie?
     var expandedSection: MovieCategory?
     
     var filteredMovies: [Movie] {
