@@ -13,11 +13,7 @@ struct ContentView: View {
         MovieDatabaseView()
             .environment(viewModel)
             .task {
-                do {
-                    viewModel.movies = try await viewModel.fetchMovies()
-                } catch {
-                    print("Error loading movies: \(error)")
-                }
+                await viewModel.loadMovies()
             }
     }
 }

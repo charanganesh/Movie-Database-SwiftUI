@@ -8,11 +8,33 @@
 import SwiftUI
 import Observation
 
+protocol MovieServiceProtocol {
+    func fetchMovies() async throws -> [Movie]
+}
+
+final class MovieService: MovieServiceProtocol {
+    func fetchMovies() async throws -> [Movie] {
+        guard let url = Bundle.main.url(forResource: "movies", withExtension: "json") else {
+            throw NSError(domain: "", code: 404, userInfo: [NSLocalizedDescriptionKey: "movies.json file not found in bundle."])
+        }
+        
+        let data = try Data(contentsOf: url)
+        let decoder = JSONDecoder()
+        return try decoder.decode([Movie].self, from: data)
+    }
+}
+
 @Observable
 final class MovieDatabaseViewModel {
     var movies: [Movie] = []
     var searchQuery: String = ""
     var expandedSection: MovieCategory?
+    
+    private let movieService: MovieServiceProtocol
+    
+    init(movieService: MovieServiceProtocol = MovieService()) {
+        self.movieService = movieService
+    }
     
     var filteredMovies: [Movie] {
         guard !searchQuery.isEmpty else { return movies }
@@ -21,18 +43,13 @@ final class MovieDatabaseViewModel {
         }
     }
     
-    func fetchMovies() async throws -> [Movie] {
-        guard let url = Bundle.main.url(forResource: "movies", withExtension: "json") else {
-            throw NSError(domain: "", code: 404, userInfo: [NSLocalizedDescriptionKey: "movies.json file not found in bundle."])
+    func loadMovies() async {
+        do {
+            self.movies = try await movieService.fetchMovies()
+        } catch {
+            print("Failed to fetch movies: \(error)")
         }
-        
-        let data = try Data(contentsOf: url)
-        let decoder = JSONDecoder()
-        let movies = try decoder.decode([Movie].self, from: data)
-        
-        return movies
     }
-    
     func toggleSection(_ category: MovieCategory) {
         if expandedSection == category {
             expandedSection = nil
