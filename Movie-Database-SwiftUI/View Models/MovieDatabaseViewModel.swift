@@ -13,7 +13,7 @@ final class MovieDatabaseViewModel {
     var movies: [Movie] = []
     var searchQuery: String = ""
     var selectedMovie: Movie?
-    var expandedSection: String?
+    var expandedSection: MovieCategory?
     
     var filteredMovies: [Movie] {
         guard !searchQuery.isEmpty else { return movies }
@@ -34,11 +34,25 @@ final class MovieDatabaseViewModel {
         return movies
     }
     
-    func toggleSection(_ category: String) {
+    func toggleSection(_ category: MovieCategory) {
         if expandedSection == category {
             expandedSection = nil
         } else {
             expandedSection = category
+        }
+    }
+    func getCategoryProvider(for category: MovieCategory) -> (Movie) -> [String] {
+        switch category {
+        case .year:
+            return { [$0.year] }
+        case .genre:
+            return { $0.genre.split(separator: ",").map { $0.trimmingCharacters(in: .whitespaces) } }
+        case .directors:
+            return { [$0.director] }
+        case .actors:
+            return { $0.actors.split(separator: ",").map { $0.trimmingCharacters(in: .whitespaces) } }
+        case .allMovies:
+            return { _ in [] }
         }
     }
 }
