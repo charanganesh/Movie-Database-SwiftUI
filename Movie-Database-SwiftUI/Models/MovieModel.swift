@@ -71,7 +71,7 @@ enum TypeEnum: String, Codable {
 
 typealias Movies = [Movie]
 
-enum MovieCategory: CaseIterable {
+enum MovieCategory: CaseIterable, Hashable {
     case year
     case genre
     case directors
@@ -90,6 +90,18 @@ enum MovieCategory: CaseIterable {
             return "Actors"
         case .allMovies:
             return "All Movies"
+        }
+    }
+}
+
+enum FilterOptions: CaseIterable {
+    case ascending, descending, year
+    
+    var title: String {
+        switch self {
+        case .ascending: return "Ascending"
+        case .descending: return "Descending"
+        case .year: return "Year"
         }
     }
 }

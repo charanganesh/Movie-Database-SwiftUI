@@ -17,13 +17,18 @@ struct MovieDatabaseView: View {
                 if viewModel.searchQuery.isEmpty {
                     VStack {
                         ForEach(MovieCategory.allCases, id: \.self) { category in
-                            CategoryRow(category: category, valuesProvider: viewModel.getCategoryProvider(for: category))
-                                .environment(viewModel)
+                            if category != .allMovies {
+                                CategoryRow(category: category, valuesProvider: viewModel.getCategoryProvider(for: category))
+                                    .environment(viewModel)
+                            } else {
+                                AllMoviesRow(category: category)
+                            }
                         }
                     }
                 } else {
                     // Display search results when there's a query
-                    ForEach(viewModel.filteredMovies) { movie in
+                    
+                    ForEach(viewModel.filteredMoviesBySearch) { movie in
                         GroupBox {
                             MovieRow(movie: movie, indentation: 0)
                         }
@@ -31,6 +36,11 @@ struct MovieDatabaseView: View {
                 }
             }
             .padding()
+            .navigationDestination(for: MovieCategory.self, destination: { category in
+                if category == .allMovies {
+                    AllMoviesListView()
+                }
+            })
             .navigationDestination(for: Movie.self) { movie in
                 MovieDetailView(movie: movie)
             }
@@ -40,6 +50,28 @@ struct MovieDatabaseView: View {
         
     }
     
+}
+
+struct AllMoviesRow: View {
+    let category: MovieCategory
+    
+    var body: some View {
+        NavigationLink(value: category) {
+            GroupBox {
+                HStack {
+                    Text(category.title)
+                        .font(.headline)
+                        .foregroundStyle(.black)
+                    Spacer()
+                    Image(systemName: "chevron.right.circle.fill")
+                        .symbolRenderingMode(.hierarchical)
+                        .font(.headline)
+                        .foregroundStyle(.gray)
+                }
+                .padding(.vertical, 5)
+            }
+        }
+    }
 }
 
 #Preview {

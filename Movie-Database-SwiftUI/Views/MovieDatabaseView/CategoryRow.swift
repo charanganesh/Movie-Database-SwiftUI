@@ -15,6 +15,7 @@ struct CategoryRow: View {
     var body: some View {
         GroupBox {
             VStack(alignment: .leading, spacing: 4) {
+                
                 Button(action: {
                     withAnimation {
                         viewModel.toggleSection(category)
@@ -35,9 +36,7 @@ struct CategoryRow: View {
 
                 if viewModel.expandedSection == category {
                     GroupBox {
-                        if category == .allMovies {
-                            AllMoviesList()
-                        } else {
+                        if category != .allMovies {
                             ExpandableCategoryList(items: Array(Set(viewModel.movies.flatMap(valuesProvider)).sorted()), filterBy: valuesProvider)
                         }
                     }

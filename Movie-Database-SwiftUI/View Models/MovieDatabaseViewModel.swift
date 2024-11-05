@@ -29,6 +29,7 @@ final class MovieDatabaseViewModel {
     var movies: [Movie] = []
     var searchQuery: String = ""
     var expandedSection: MovieCategory?
+    var selectedFilterOption: FilterOptions?
     
     private let movieService: MovieServiceProtocol
     
@@ -36,10 +37,23 @@ final class MovieDatabaseViewModel {
         self.movieService = movieService
     }
     
-    var filteredMovies: [Movie] {
+    var filteredMoviesBySearch: [Movie] {
         guard !searchQuery.isEmpty else { return movies }
         return movies.filter {
             $0.title.contains(searchQuery) || $0.genre.contains(searchQuery) || $0.actors.contains(searchQuery) || $0.director.contains(searchQuery)
+        }
+    }
+    
+    var filteredMovies: [Movie] {
+        switch selectedFilterOption {
+        case .ascending:
+            return movies.sorted { $0.title < $1.title}
+        case .descending:
+            return movies.sorted { $0.title > $1.title}
+        case .year:
+            return movies.sorted { $0.year < $1.year }
+        case .none:
+            return movies
         }
     }
     
